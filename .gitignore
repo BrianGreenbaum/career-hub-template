@@ -1,0 +1,21 @@
+# Work history source documents — only the summaries/ subfolder is tracked
+Work-History/*/
+!Work-History/*/summaries/
+!Work-History/*/summaries/**
+!Work-History/inbox/
+Work-History/inbox/*
+!Work-History/inbox/README.md
+
+# PDF text extractions (generated locally from source PDFs)
+**/*.pdftext.txt
+
+# Editor / OS cruft
+.DS_Store
+.obsidian/
+.vscode/
+.idea/
+*.swp
+*~
+
+# Local Claude Code settings (contains user-specific permissions)
+.claude/settings.local.json

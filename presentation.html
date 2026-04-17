@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Career Hub — AI-Powered Career Management</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #FAF7F2;
+    --bg-warm: #F5F0E8;
+    --text: #1C1917;
+    --text-secondary: #57534E;
+    --text-muted: #A8A29E;
+    --accent: #D97706;
+    --accent-deep: #B45309;
+    --accent-light: #FEF3C7;
+    --accent-glow: rgba(217, 119, 6, 0.12);
+    --blue: #1D4ED8;
+    --blue-light: #DBEAFE;
+    --green: #15803D;
+    --green-light: #DCFCE7;
+    --green-bg: #F0FDF4;
+    --purple: #7C3AED;
+    --purple-light: #EDE9FE;
+    --rose: #BE123C;
+    --rose-light: #FFE4E6;
+    --rose-bg: #FFF1F2;
+    --card: #FFFFFF;
+    --card-border: rgba(28, 25, 23, 0.06);
+    --card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04), 0 4px 12px rgba(28, 25, 23, 0.03);
+    --card-shadow-lg: 0 4px 6px rgba(28, 25, 23, 0.04), 0 12px 32px rgba(28, 25, 23, 0.06);
+    --terminal-bg: #0C0A09;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --display: 'Bricolage Grotesque', Georgia, serif;
+    --body: 'DM Sans', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', 'SF Mono', monospace;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: var(--body);
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 200;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+
+  /* Slide container */
+  .deck {
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 6vh 6vw 10vh;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    overflow: hidden;
+  }
+
+  .slide > div {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: flex-start;
+    padding-top: 2vh;
+    min-height: 0;
+  }
+
+  .slide.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Title slide centers its content */
+  .slide.centered > div {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding-top: 0;
+  }
+
+  /* Decorative orb for visual interest */
+  .slide::after {
+    content: '';
+    position: absolute;
+    width: 50vw;
+    height: 50vw;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .slide.active::after {
+    opacity: 1;
+  }
+
+  /* Different orb positions per slide type */
+  .slide[data-accent="warm"]::after {
+    background: radial-gradient(circle, rgba(217, 119, 6, 0.06) 0%, transparent 70%);
+    right: -15vw;
+    bottom: -15vw;
+  }
+
+  .slide[data-accent="blue"]::after {
+    background: radial-gradient(circle, rgba(29, 78, 216, 0.05) 0%, transparent 70%);
+    left: -15vw;
+    bottom: -10vw;
+  }
+
+  .slide[data-accent="green"]::after {
+    background: radial-gradient(circle, rgba(21, 128, 61, 0.05) 0%, transparent 70%);
+    right: -10vw;
+    top: -10vw;
+  }
+
+  .slide[data-accent="purple"]::after {
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.05) 0%, transparent 70%);
+    left: -10vw;
+    top: -15vw;
+  }
+
+  .slide[data-accent="rose"]::after {
+    background: radial-gradient(circle, rgba(190, 18, 60, 0.04) 0%, transparent 70%);
+    right: -10vw;
+    top: 5vh;
+  }
+
+  /* Navigation */
+  .nav {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    z-index: 100;
+  }
+
+  .nav button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--card-border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    box-shadow: var(--card-shadow);
+    transition: all 0.2s ease;
+  }
+
+  .nav button:hover {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent-deep);
+    transform: scale(1.05);
+  }
+
+  .nav button:disabled { opacity: 0.25; cursor: default; transform: none; }
+  .nav button:disabled:hover { background: var(--card); border-color: var(--card-border); color: var(--text); }
+
+  .nav .counter {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    min-width: 44px;
+    text-align: center;
+  }
+
+  /* Progress bar */
+  .progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-deep));
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+  }
+
+  /* ===================== TYPOGRAPHY ===================== */
+
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(44px, 5.5vw, 72px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-size: clamp(30px, 3.5vw, 48px);
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    color: var(--text);
+    margin-bottom: 1.5vh;
+  }
+
+  h3 {
+    font-family: var(--display);
+    font-size: clamp(17px, 1.6vw, 22px);
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  p, li {
+    font-size: clamp(16px, 1.5vw, 21px);
+    line-height: 1.65;
+    color: #44403C;
+  }
+
+  .subtitle {
+    font-size: clamp(18px, 1.8vw, 24px);
+    color: #57534E;
+    line-height: 1.5;
+    margin-top: 1.2vh;
+  }
+
+  .small { font-size: clamp(12px, 1vw, 14px); }
+  .muted { color: var(--text-muted); }
+
+  /* Section label — the colored uppercase tag */
+  .section-label {
+    font-family: var(--mono);
+    font-size: clamp(11px, 0.85vw, 13px);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 1vh;
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
+  .section-label[data-theme="warm"] { background: var(--accent-light); color: var(--accent-deep); }
+  .section-label[data-theme="blue"] { background: var(--blue-light); color: var(--blue); }
+  .section-label[data-theme="green"] { background: var(--green-light); color: var(--green); }
+  .section-label[data-theme="purple"] { background: var(--purple-light); color: var(--purple); }
+  .section-label[data-theme="rose"] { background: var(--rose-light); color: var(--rose); }
+
+  /* Lists */
+  ul { list-style: none; }
+  ul li {
+    padding-left: 20px;
+    position: relative;
+    margin-bottom: clamp(8px, 1vh, 14px);
+  }
+  ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.65em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  code {
+    font-family: var(--mono);
+    background: var(--bg-warm);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    font-weight: 500;
+    color: var(--text);
+    border: 1px solid var(--card-border);
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  /* ===================== LAYOUT HELPERS ===================== */
+
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4vw;
+    align-items: start;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    margin-top: 2vh;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: clamp(20px, 2.5vh, 32px);
+    box-shadow: var(--card-shadow);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .card:hover {
+    box-shadow: var(--card-shadow-lg);
+  }
+
+  .card h3 { margin-bottom: 8px; }
+  .card p { font-size: clamp(15px, 1.3vw, 18px); color: #44403C; }
+
+  .icon-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+
+  /* ===================== FOLDER TREE ===================== */
+
+  .tree {
+    font-family: var(--mono);
+    font-size: clamp(14px, 1.25vw, 17px);
+    line-height: 2;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: clamp(20px, 2.5vh, 28px);
+    box-shadow: var(--card-shadow);
+  }
+
+  .tree .folder { color: var(--accent-deep); font-weight: 500; }
+  .tree .file { color: var(--text-secondary); }
+  .tree .label { color: var(--text-muted); font-family: var(--body); font-size: clamp(12px, 1vw, 14px); font-style: italic; }
+  .tree .connector { color: var(--text-muted); user-select: none; }
+
+  /* ===================== TERMINAL MOCKUP ===================== */
+
+  .terminal {
+    background: var(--terminal-bg);
+    border-radius: var(--radius);
+    padding: 0;
+    box-shadow: var(--card-shadow-lg), 0 0 0 1px rgba(255,255,255,0.05) inset;
+    overflow: hidden;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .terminal-bar {
+    background: rgba(255,255,255,0.06);
+    padding: 12px 16px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .terminal-dot.red { background: #FF6159; }
+  .terminal-dot.yellow { background: #FFC130; }
+  .terminal-dot.green { background: #29CE42; }
+
+  .terminal-body {
+    padding: clamp(18px, 2.5vh, 28px) clamp(20px, 2vw, 32px);
+    font-family: var(--mono);
+    font-size: clamp(13px, 1.15vw, 16px);
+    line-height: 1.75;
+    color: #E7E5E4;
+    flex: 1;
+    word-break: break-word;
+  }
+
+  .terminal-body .prompt { color: #4ADE80; }
+  .terminal-body .cmd { color: #FDE68A; font-weight: 500; }
+  .terminal-body .output { color: #93C5FD; }
+  .terminal-body .highlight { color: #FB923C; }
+  .terminal-body .dim { color: #57534E; }
+
+  /* ===================== CONTRAST BOXES ===================== */
+
+  .contrast-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3vw;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    margin-top: 2vh;
+  }
+
+  .contrast-box {
+    border-radius: var(--radius);
+    padding: clamp(24px, 3vh, 36px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .contrast-box.yes {
+    background: var(--green-bg);
+    border: 1.5px solid #BBF7D0;
+  }
+
+  .contrast-box.no {
+    background: var(--rose-bg);
+    border: 1.5px solid #FECDD3;
+  }
+
+  .contrast-box h3 { margin-bottom: 16px; font-size: clamp(19px, 1.7vw, 24px); }
+  .contrast-box li { font-size: clamp(15px, 1.35vw, 19px); }
+  .contrast-box.yes li::before { background: var(--green); }
+  .contrast-box.no li::before { background: var(--rose); }
+
+  /* ===================== SKILL CARDS ===================== */
+
+  .skill-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(12px, 1.5vh, 20px);
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    margin-top: 2vh;
+  }
+
+  .skill-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: clamp(18px, 2.2vh, 28px);
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .skill-card:hover {
+    box-shadow: var(--card-shadow-lg);
+    transform: translateY(-1px);
+  }
+
+  .skill-card code {
+    font-size: clamp(15px, 1.4vw, 18px);
+    color: var(--accent-deep);
+    background: var(--accent-light);
+    border-color: rgba(217, 119, 6, 0.15);
+    font-weight: 500;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+
+  .skill-card p { font-size: clamp(15px, 1.3vw, 18px); color: #44403C; margin-top: 4px; }
+
+  /* ===================== BUILDING BLOCKS GRID ===================== */
+
+  .blocks-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(12px, 1.5vh, 20px);
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    margin-top: 2vh;
+  }
+
+  .block-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: clamp(20px, 2.5vh, 32px);
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: box-shadow 0.2s ease;
+  }
+
+  .block-card:hover { box-shadow: var(--card-shadow-lg); }
+
+  .block-card .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: var(--accent);
+    color: white;
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .block-card h3 { font-size: clamp(18px, 1.6vw, 22px); margin-bottom: 8px; }
+  .block-card p { font-size: clamp(15px, 1.3vw, 18px); color: #44403C; }
+
+  /* ===================== CENTERED SLIDES ===================== */
+
+  .centered { text-align: center; align-items: center; }
+  .centered h2 { max-width: 80%; }
+  .centered p, .centered .subtitle { max-width: 70%; }
+
+  /* ===================== STEPS LIST ===================== */
+
+  .steps {
+    list-style: none;
+    counter-reset: step;
+  }
+
+  .steps li {
+    padding-left: 48px;
+    position: relative;
+    margin-bottom: clamp(16px, 2vh, 24px);
+  }
+
+  .steps li::before {
+    counter-increment: step;
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 2px;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: white;
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ===================== PILLAR SLIDES ===================== */
+
+  .pillar-slide > div {
+    justify-content: space-between;
+    gap: 0;
+  }
+
+  .pillar-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh;
+    margin-bottom: 3vh;
+  }
+
+  .pillar-header .icon-circle {
+    margin-bottom: 0;
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+  }
+
+  .pillar-header h2 { margin-bottom: 0; }
+
+  .pillar-points {
+    margin-top: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .pillar-points li {
+    font-size: clamp(17px, 1.5vw, 21px);
+    margin-bottom: clamp(10px, 1.8vh, 20px);
+  }
+
+  .callout {
+    background: var(--accent-light);
+    border: 1.5px solid rgba(217, 119, 6, 0.2);
+    border-radius: var(--radius-sm);
+    padding: clamp(18px, 2.5vh, 28px);
+    margin-top: auto;
+    font-size: clamp(15px, 1.3vw, 18px);
+    line-height: 1.55;
+    color: #57534E;
+  }
+
+  .callout strong { color: var(--accent-deep); font-weight: 600; }
+
+  /* ===================== RESPONSIVE ===================== */
+
+  @media (max-width: 900px) {
+    .slide { padding: 4vh 5vw 9vh; }
+    .split, .contrast-grid, .skill-grid, .blocks-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    .slide { padding: 3vh 4vw 9vh; }
+  }
+
+  /* ===================== ENTRANCE ANIMATIONS ===================== */
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide.active > div > * {
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .slide.active > div > *:nth-child(1) { animation-delay: 0.05s; }
+  .slide.active > div > *:nth-child(2) { animation-delay: 0.1s; }
+  .slide.active > div > *:nth-child(3) { animation-delay: 0.18s; }
+  .slide.active > div > *:nth-child(4) { animation-delay: 0.25s; }
+  .slide.active > div > *:nth-child(5) { animation-delay: 0.32s; }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<div class="deck" id="deck">
+
+  <!-- SLIDE 1: Title -->
+  <div class="slide centered active" data-slide="1" data-accent="warm">
+    <div>
+      <p class="section-label" data-theme="warm">Introducing</p>
+      <h1>Career Hub</h1>
+      <p class="subtitle">An AI-powered system for managing your job search, built on Claude Code</p>
+      <p class="small muted" style="margin-top: 4vh;">Brian Greenbaum &middot; April 2026</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: The Problem -->
+  <div class="slide" data-slide="2" data-accent="rose">
+    <div>
+      <p class="section-label" data-theme="rose">The problem</p>
+      <h2>Job searching is a full-time job</h2>
+      <p class="subtitle" style="margin-bottom: 3vh;">And you're doing most of it in your head.</p>
+      <ul>
+        <li>Tracking applications across companies, stages, and contacts</li>
+        <li>Prepping for interviews with 20 years of work to draw from</li>
+        <li>Researching companies, teams, and the people you're talking to</li>
+        <li>Keeping your narrative sharp across dozens of conversations</li>
+        <li>All while probably still doing your current job</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: The Idea -->
+  <div class="slide" data-slide="3" data-accent="blue">
+    <div>
+      <p class="section-label" data-theme="blue">A different approach</p>
+      <h2>Don't chat with AI.<br>Build a workspace it can operate in.</h2>
+      <p class="subtitle" style="margin-bottom: 3vh;">Instead of a single conversation that forgets everything, create a structured folder where AI reads your files, learns your context, and runs reusable workflows.</p>
+      <div class="split">
+        <div class="card" style="border-top: 3px solid var(--text-muted);">
+          <h3 style="margin-bottom: 8px;">The old way</h3>
+          <p>Open ChatGPT. Paste your resume. Ask a question. Close the tab. Start over next time.</p>
+        </div>
+        <div class="card" style="border-top: 3px solid var(--accent);">
+          <h3 style="margin-bottom: 8px;">This way</h3>
+          <p>A folder of structured files that grows with you. The AI reads them every session. Nothing gets lost. Workflows are reusable.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: What is Claude Code? -->
+  <div class="slide" data-slide="4" data-accent="purple">
+    <div>
+      <p class="section-label" data-theme="purple">Quick orientation</p>
+      <h2>What is Claude Code?</h2>
+      <p class="subtitle" style="margin-bottom: 3vh;">An AI tool that works directly with files on your computer. Available as a CLI, desktop app, web app, and IDE extension.</p>
+      <div class="split">
+        <div>
+          <ul>
+            <li>It reads and writes files in your project folder</li>
+            <li>It reads <code>CLAUDE.md</code> files for instructions, so your folder <em>teaches</em> the AI about you</li>
+            <li>It can run reusable workflows called "skills"</li>
+            <li>It can connect to external services (Google, calendars, etc.)</li>
+          </ul>
+        </div>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dot red"></div>
+            <div class="terminal-dot yellow"></div>
+            <div class="terminal-dot green"></div>
+          </div>
+          <div class="terminal-body">
+            <span class="dim">~/CareerHub $</span> <span class="cmd">claude</span><br><br>
+            <span class="output">Reading CLAUDE.md...</span><br>
+            <span class="dim">  Found: your background, goals,</span><br>
+            <span class="dim">  search criteria, work history</span><br><br>
+            <span class="prompt">></span> <span class="highlight">/job-search</span><br>
+            <span class="output">Running exhaustive search...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: Building Blocks -->
+  <div class="slide" data-slide="5" data-accent="purple">
+    <div>
+      <p class="section-label" data-theme="purple">The building blocks</p>
+      <h2>Four concepts make this work</h2>
+      <div class="blocks-grid">
+        <div class="block-card">
+          <div class="num">1</div>
+          <h3>Folder structure</h3>
+          <p>Organized files and folders give the AI structured context. Each folder has a purpose: job search, work history, networking, etc.</p>
+        </div>
+        <div class="block-card">
+          <div class="num">2</div>
+          <h3>CLAUDE.md</h3>
+          <p>Instruction files the AI reads automatically. They teach it who you are, what you're looking for, and how to help you.</p>
+        </div>
+        <div class="block-card">
+          <div class="num">3</div>
+          <h3>Skills</h3>
+          <p>Reusable workflows you invoke with <code>/commands</code>. Run a job search, do an interview, build a case study. Same quality every time.</p>
+        </div>
+        <div class="block-card">
+          <div class="num">4</div>
+          <h3>MCPs</h3>
+          <p>Connections to external services. Pull meeting notes from Granola, check your calendar, search the web. Bring outside data in.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: Folder Structure -->
+  <div class="slide" data-slide="6" data-accent="warm">
+    <div>
+      <p class="section-label" data-theme="warm">How it works</p>
+      <h2>The folder structure</h2>
+      <div class="split">
+        <div class="tree">
+          <span class="folder">CareerHub/</span><br>
+          <span class="connector">├── </span><span class="file">CLAUDE.md</span> <span class="label">&larr; your profile &amp; instructions</span><br>
+          <span class="connector">├── </span><span class="file">TODOS.md</span> <span class="label">&larr; Kanban task board</span><br>
+          <span class="connector">├── </span><span class="folder">Search/2026/</span> <span class="label">&larr; active job search</span><br>
+          <span class="connector">│&nbsp;&nbsp;&nbsp;├── </span><span class="file">DASHBOARD.md</span><br>
+          <span class="connector">│&nbsp;&nbsp;&nbsp;├── </span><span class="folder">companies/</span><br>
+          <span class="connector">│&nbsp;&nbsp;&nbsp;└── </span><span class="folder">searches/</span><br>
+          <span class="connector">├── </span><span class="folder">Work-History/</span> <span class="label">&larr; past roles</span><br>
+          <span class="connector">├── </span><span class="folder">Weekly/</span> <span class="label">&larr; journal entries</span><br>
+          <span class="connector">├── </span><span class="folder">Networking/</span> <span class="label">&larr; relationships</span><br>
+          <span class="connector">├── </span><span class="folder">Portfolio/</span> <span class="label">&larr; case studies</span><br>
+          <span class="connector">└── </span><span class="folder">.claude/skills/</span> <span class="label">&larr; reusable workflows</span>
+        </div>
+        <div>
+          <h3 style="margin-bottom: 12px;">Each folder has a job</h3>
+          <ul>
+            <li><strong>Search</strong> tracks your full pipeline: prospects, applications, interviews, offers</li>
+            <li><strong>Work-History</strong> holds structured summaries of every role and project</li>
+            <li><strong>Weekly</strong> captures recaps so you don't lose track of what's happening</li>
+            <li><strong>Networking</strong> remembers the people you talk to and what you discussed</li>
+          </ul>
+          <p class="muted small" style="margin-top: 16px;">Works in Obsidian as a vault with Kanban for task management. Also works as plain markdown files.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: Obsidian -->
+  <div class="slide" data-slide="7" data-accent="purple">
+    <div>
+      <p class="section-label" data-theme="purple">The viewer</p>
+      <h2>Obsidian is your IDE</h2>
+      <p class="subtitle" style="margin-bottom: 3vh;">A free markdown editor that treats your hub folder as a vault. Claude operates on the files regardless &mdash; Obsidian is how <em>you</em> read, navigate, and manage them day to day.</p>
+      <div class="split">
+        <div>
+          <ul>
+            <li>Point Obsidian at your Career Hub and the whole folder becomes a "vault"</li>
+            <li>Markdown renders with clickable links, backlinks, outlines, and a graph view</li>
+            <li>Navigate between companies, skills, and past roles without hunting through folders</li>
+            <li>Everything stays plain markdown &mdash; no lock-in, works in any editor</li>
+          </ul>
+          <div class="callout">
+            <strong>Install the Kanban plugin</strong> (by mgmeyers, from the community plugins browser) to turn <code>TODOS.md</code> into a drag-and-drop task board. More on that next.
+          </div>
+        </div>
+        <div class="card" style="padding: 0; overflow: hidden; align-self: stretch;">
+          <div style="background: var(--bg-warm); padding: clamp(12px, 1.6vh, 18px) clamp(16px, 1.8vw, 22px); border-bottom: 1px solid var(--card-border); font-family: var(--mono); font-size: clamp(10px, 0.85vw, 12px); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">
+            CareerHub &mdash; Obsidian Vault
+          </div>
+          <div style="padding: clamp(18px, 2.5vh, 24px) clamp(18px, 2vw, 24px); font-family: var(--mono); font-size: clamp(13px, 1.1vw, 15px); line-height: 2; color: var(--text-secondary);">
+            <div style="color: var(--accent-deep); font-weight: 500;">&#x25BC; CareerHub</div>
+            <div style="padding-left: 16px;">
+              <div>CLAUDE.md</div>
+              <div style="color: var(--accent-deep);">TODOS.md &nbsp;<span style="color: var(--text-muted); font-family: var(--body); font-size: 0.85em; font-style: italic;">&larr; Kanban view</span></div>
+              <div style="color: var(--accent-deep); font-weight: 500;">&#x25BC; Search/2026</div>
+              <div style="padding-left: 16px;">
+                <div>DASHBOARD.md</div>
+                <div style="color: var(--accent-deep); font-weight: 500;">&#x25B6; companies</div>
+              </div>
+              <div style="color: var(--accent-deep); font-weight: 500;">&#x25B6; Work-History</div>
+              <div style="color: var(--accent-deep); font-weight: 500;">&#x25B6; Weekly</div>
+              <div style="color: var(--accent-deep); font-weight: 500;">&#x25B6; Networking</div>
+              <div style="color: var(--accent-deep); font-weight: 500;">&#x25B6; Portfolio</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: Kanban TODO Board -->
+  <div class="slide" data-slide="8" data-accent="green">
+    <div>
+      <p class="section-label" data-theme="green">Task management</p>
+      <h2>One Kanban for everything</h2>
+      <p class="subtitle" style="margin-bottom: 2.5vh;">Action items across search, networking, and work all live on a single board at <code>TODOS.md</code>. Managed from the CLI, rendered as drag-and-drop in Obsidian.</p>
+      <div class="split" style="flex: 0 0 auto; margin-bottom: 2.5vh;">
+        <div>
+          <h3 style="margin-bottom: 10px;">How you write tasks</h3>
+          <ul>
+            <li>Columns: <strong>Not Started</strong> &rarr; Started &rarr; Waiting &rarr; Done &rarr; Archive</li>
+            <li>Tag by area: <code>#search</code> <code>#networking</code> <code>#work</code></li>
+            <li>Prioritize with 🔴 High &nbsp; 🟡 Medium &nbsp; 🟢 Low</li>
+            <li>Add due dates with <code>@{2026-04-25}</code></li>
+          </ul>
+        </div>
+        <div>
+          <h3 style="margin-bottom: 10px;">How you manage them</h3>
+          <ul>
+            <li><code>/todo add [task]</code> &mdash; add a new card</li>
+            <li><code>/todo done [task]</code> &mdash; mark complete</li>
+            <li><code>/todo move [task] [column]</code> &mdash; change column</li>
+            <li><code>/todo list #search</code> &mdash; filter by tag</li>
+          </ul>
+        </div>
+      </div>
+      <!-- Obsidian window frame -->
+      <div style="background: #1e1e1e; border-radius: 10px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.35); border: 1px solid #3a3a3a;">
+        <!-- Title bar -->
+        <div style="background: #161616; padding: 9px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #333;">
+          <div style="display: flex; gap: 6px; flex-shrink: 0;">
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57;"></div>
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: #ffbd2e;"></div>
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: #28c840;"></div>
+          </div>
+          <span style="color: #aaa; font-family: var(--body); font-size: clamp(11px, 0.9vw, 13px); margin-left: 8px; flex: 1; text-align: center;">TODOS.md</span>
+          <div style="display: flex; align-items: center; gap: 5px; flex-shrink: 0;">
+            <svg width="14" height="14" viewBox="0 0 32 32" fill="none"><path d="M16 2L4 11L7 26L16 30L25 26L28 11Z" fill="#7c3aed"/><path d="M16 2L28 11L20 14Z" fill="#a78bfa" opacity="0.7"/><path d="M16 2L4 11L12 14Z" fill="#c4b5fd" opacity="0.5"/></svg>
+            <span style="color: #888; font-family: var(--body); font-size: clamp(11px, 0.9vw, 12px); font-weight: 600; letter-spacing: 0.03em;">Obsidian</span>
+          </div>
+        </div>
+        <!-- App body -->
+        <div style="display: flex; height: auto;">
+          <!-- Sidebar -->
+          <div style="background: #161616; width: clamp(110px, 10vw, 145px); padding: 12px 8px; border-right: 1px solid #2a2a2a; font-family: var(--mono); font-size: clamp(10px, 0.85vw, 12px); color: #888; flex-shrink: 0; line-height: 2;">
+            <div style="color: #a78bfa; font-weight: 600; margin-bottom: 4px;">&#x25BC; CareerHub</div>
+            <div style="padding-left: 10px;">
+              <div>CLAUDE.md</div>
+              <div style="color: #a78bfa; background: rgba(167,139,250,0.15); border-radius: 4px; padding: 1px 5px; margin: 1px -5px;">TODOS.md</div>
+              <div style="color: #a78bfa;">&#x25BC; Search/2026</div>
+              <div style="padding-left: 10px; color: #666;">DASHBOARD.md</div>
+              <div style="color: #a78bfa;">&#x25B6; Work-History</div>
+              <div style="color: #a78bfa;">&#x25B6; Weekly</div>
+              <div style="color: #a78bfa;">&#x25B6; Networking</div>
+            </div>
+          </div>
+          <!-- Kanban content -->
+          <div style="flex: 1; padding: clamp(10px, 1.2vh, 14px) clamp(10px, 1vw, 14px); overflow: hidden; background: #1e1e1e;">
+            <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr; gap: clamp(6px, 0.6vw, 10px);">
+              <div style="background: #252525; border: 1px solid #333; border-radius: 6px; padding: clamp(8px, 1vh, 12px);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-family: var(--body); font-size: clamp(11px, 0.9vw, 13px); font-weight: 600; color: #e0e0e0;">
+                  <span>Not Started</span><span style="color: #666; font-weight: 400;">3</span>
+                </div>
+                <div style="background: #2e2e2e; border: 1px solid #3a3a3a; border-radius: 5px; padding: 7px 9px; margin-bottom: 5px; font-size: clamp(10px, 0.85vw, 12px); line-height: 1.4; color: #ccc;">🔴 Run <code style="font-size: 0.9em; color: #a78bfa;">/process-work-history</code></div>
+                <div style="background: #2e2e2e; border: 1px solid #3a3a3a; border-radius: 5px; padding: 7px 9px; margin-bottom: 5px; font-size: clamp(10px, 0.85vw, 12px); line-height: 1.4; color: #ccc;">🟡 Do a <code style="font-size: 0.9em; color: #a78bfa;">/project-interview</code></div>
+                <div style="background: #2e2e2e; border: 1px solid #3a3a3a; border-radius: 5px; padding: 7px 9px; font-size: clamp(10px, 0.85vw, 12px); line-height: 1.4; color: #ccc;">🟡 Run <code style="font-size: 0.9em; color: #a78bfa;">/job-search</code></div>
+              </div>
+              <div style="background: #252525; border: 1px solid #333; border-radius: 6px; padding: clamp(8px, 1vh, 12px);">
+                <div style="font-family: var(--body); font-size: clamp(11px, 0.9vw, 13px); font-weight: 600; color: #e0e0e0; display: flex; justify-content: space-between;"><span>Started</span><span style="color: #666; font-weight: 400;">0</span></div>
+              </div>
+              <div style="background: #252525; border: 1px solid #333; border-radius: 6px; padding: clamp(8px, 1vh, 12px);">
+                <div style="font-family: var(--body); font-size: clamp(11px, 0.9vw, 13px); font-weight: 600; color: #e0e0e0; display: flex; justify-content: space-between;"><span>Waiting</span><span style="color: #666; font-weight: 400;">0</span></div>
+              </div>
+              <div style="background: #252525; border: 1px solid #333; border-radius: 6px; padding: clamp(8px, 1vh, 12px);">
+                <div style="font-family: var(--body); font-size: clamp(11px, 0.9vw, 13px); font-weight: 600; color: #e0e0e0; display: flex; justify-content: space-between;"><span>Done</span><span style="color: #666; font-weight: 400;">0</span></div>
+              </div>
+              <div style="background: #252525; border: 1px solid #333; border-radius: 6px; padding: clamp(8px, 1vh, 12px);">
+                <div style="font-family: var(--body); font-size: clamp(11px, 0.9vw, 13px); font-weight: 600; color: #e0e0e0; display: flex; justify-content: space-between;"><span>Archive</span><span style="color: #666; font-weight: 400;">0</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: Three Pillars Intro -->
+  <div class="slide" data-slide="6" data-accent="warm">
+    <div>
+      <p class="section-label" data-theme="warm">What it does for you</p>
+      <h2>Three pillars</h2>
+      <p class="subtitle" style="margin-bottom: 3vh;">The hub helps you in three distinct ways. Each one compounds over time as you feed it more context.</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2.5vw; flex: 1; align-items: start; margin-top: 1vh;">
+        <div class="card" style="border-top: 4px solid var(--blue); text-align: center; padding: clamp(24px, 3vh, 40px);">
+          <div class="icon-circle" style="background: var(--blue-light); color: var(--blue); margin: 0 auto 16px;">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/><path d="M9 22h6"/><path d="M10 17h4"/></svg>
+          </div>
+          <h3 style="margin-bottom: 8px;">Second Brain</h3>
+          <p>Captures everything in structured files so the AI has full context every session. Doesn't forget.</p>
+        </div>
+        <div class="card" style="border-top: 4px solid var(--green); text-align: center; padding: clamp(24px, 3vh, 40px);">
+          <div class="icon-circle" style="background: var(--green-light); color: var(--green); margin: 0 auto 16px;">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <h3 style="margin-bottom: 8px;">Coach</h3>
+          <p>Prepares you for interviews and gives feedback grounded in your actual work history.</p>
+        </div>
+        <div class="card" style="border-top: 4px solid var(--purple); text-align: center; padding: clamp(24px, 3vh, 40px);">
+          <div class="icon-circle" style="background: var(--purple-light); color: var(--purple); margin: 0 auto 16px;">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </div>
+          <h3 style="margin-bottom: 8px;">Research Assistants</h3>
+          <p>Automates company research, people lookup, and exhaustive job searches across 12+ sources.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: Pillar 1 — Second Brain -->
+  <div class="slide pillar-slide" data-slide="6" data-accent="blue">
+    <div>
+      <div class="pillar-header">
+        <p class="section-label" data-theme="blue">Pillar 1</p>
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div class="icon-circle" style="background: var(--blue-light); color: var(--blue);">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/><path d="M9 22h6"/><path d="M10 17h4"/></svg>
+          </div>
+          <h2 style="margin-bottom: 0;">Second Brain</h2>
+        </div>
+      </div>
+      <ul class="pillar-points">
+        <li>Captures what you share &mdash; verbally, from documents, from meeting notes &mdash; into structured files</li>
+        <li>Builds a rich picture of your work history, search activity, contacts, and performance</li>
+        <li>Doesn't forget, because it takes structured notes in organized folders</li>
+        <li>Available to the AI in every session &mdash; full context, every time</li>
+      </ul>
+      <div class="callout">
+        <strong>The reflection bonus:</strong> When you do project interviews, you're not just training the AI. The act of storytelling and reflecting triggers memories and sharpens your narrative for real conversations.
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: Pillar 2 — Coach -->
+  <div class="slide pillar-slide" data-slide="7" data-accent="green">
+    <div>
+      <div class="pillar-header">
+        <p class="section-label" data-theme="green">Pillar 2</p>
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div class="icon-circle" style="background: var(--green-light); color: var(--green);">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <h2 style="margin-bottom: 0;">Coach</h2>
+        </div>
+      </div>
+      <ul class="pillar-points">
+        <li>Helps you prep for "tell me about a time when..." questions</li>
+        <li>Gives feedback on your narrative, resume, and interview responses</li>
+        <li>Coaching is grounded in your actual history &mdash; not generic advice</li>
+        <li>Can role-play interviews and suggest stronger ways to frame your experience</li>
+      </ul>
+      <div class="callout">
+        <strong>Key insight:</strong> Because the AI has your full work history and project dossiers, its coaching is specific. It can say "remember when you led that migration at Pendo?" instead of "consider mentioning a leadership example."
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: Pillar 3 — Research Assistants -->
+  <div class="slide pillar-slide" data-slide="8" data-accent="purple">
+    <div>
+      <div class="pillar-header">
+        <p class="section-label" data-theme="purple">Pillar 3</p>
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div class="icon-circle" style="background: var(--purple-light); color: var(--purple);">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </div>
+          <h2 style="margin-bottom: 0;">Research Assistants</h2>
+        </div>
+      </div>
+      <ul class="pillar-points">
+        <li>Runs exhaustive job searches across 12+ sources based on your criteria</li>
+        <li>Deep-dives on companies: AI strategy, leadership, culture, financials</li>
+        <li>Looks up people you're interviewing with &mdash; their background, interests, shared connections</li>
+        <li>Web research, your own data, and third-party tools &mdash; all in one place</li>
+      </ul>
+      <div class="callout">
+        <strong>The time savings are real:</strong> Research that would take hours happens in minutes. Bull/bear analysis on a company, compensation benchmarking, liquidity assessment &mdash; the grunt work gets automated so you can focus on the human parts.
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: What This Is NOT -->
+  <div class="slide" data-slide="9" data-accent="rose">
+    <div>
+      <p class="section-label" data-theme="rose">Important framing</p>
+      <h2>Be the best version of yourself</h2>
+      <div class="contrast-grid" style="flex: 0 0 auto; align-items: start;">
+        <div class="contrast-box yes">
+          <h3 style="color: var(--green);">What this is</h3>
+          <ul>
+            <li>A system that keeps you organized and prepared</li>
+            <li>A way to extend yourself &mdash; do things you couldn't do alone</li>
+            <li>A tool for reflection that sharpens your real narrative</li>
+            <li>A research team that saves you hours every week</li>
+          </ul>
+        </div>
+        <div class="contrast-box no">
+          <h3 style="color: var(--rose);">What this is not</h3>
+          <ul>
+            <li>A magic job-getting machine</li>
+            <li>A replacement for doing the actual work</li>
+            <li>A tool for making things up or embellishing</li>
+            <li>Something that removes the need for human judgment</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout">
+        <strong>The goal:</strong> authenticity at your best. This project helps you be organized, informed, and well-prepared &mdash; not fabricated.
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 11: /onboard -->
+  <div class="slide" data-slide="11" data-accent="warm">
+    <div>
+      <p class="section-label" data-theme="warm">Key skill</p>
+      <h2><code style="font-size: clamp(24px, 2.8vw, 36px); background: var(--accent-light); color: var(--accent-deep); border-color: rgba(217,119,6,0.15);">/onboard</code></h2>
+      <p class="subtitle" style="margin-bottom: 2.5vh;">Your first 10 minutes with the hub</p>
+      <div class="split">
+        <div>
+          <ul>
+            <li>A guided interview about your background, current role, and what you're looking for</li>
+            <li>Generates a customized <code>CLAUDE.md</code> with your profile, goals, and preferences</li>
+            <li>Creates a personalized <code>/job-search</code> skill tailored to your target roles, locations, comp, and industries</li>
+            <li>Seeds your TODO board and next actions so you can start working right away</li>
+          </ul>
+          <div class="callout">
+            <strong>This is how the hub learns about you.</strong> Everything downstream &mdash; job searches, coaching, research &mdash; gets better because onboarding gave the AI real context about who you are and what you want.
+          </div>
+        </div>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dot red"></div>
+            <div class="terminal-dot yellow"></div>
+            <div class="terminal-dot green"></div>
+          </div>
+          <div class="terminal-body">
+            <span class="dim">~/CareerHub$</span> <span class="cmd">claude</span><br><br>
+            <span class="prompt">></span> <span class="highlight">/onboard</span><br><br>
+            <span class="output">Let's get your hub set up.</span><br>
+            <span class="output">First, tell me about yourself...</span><br><br>
+            <span class="dim">  What's your current role?</span><br>
+            <span class="dim">  What are you looking for?</span><br>
+            <span class="dim">  What locations work?</span><br>
+            <span class="dim">  What comp range are you targeting?</span><br><br>
+            <span class="output">Got it. Generating your profile</span><br>
+            <span class="output">and custom job search skill...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 12: /project-interview -->
+  <div class="slide" data-slide="12" data-accent="blue">
+    <div>
+      <p class="section-label" data-theme="blue">Key skill</p>
+      <h2><code style="font-size: clamp(24px, 2.8vw, 36px); background: var(--blue-light); color: var(--blue); border-color: rgba(29,78,216,0.15);">/project-interview</code></h2>
+      <p class="subtitle" style="margin-bottom: 2.5vh;">Build your second brain through conversation</p>
+      <div class="split">
+        <div>
+          <ul>
+            <li>Claude interviews you about a past project &mdash; what you did, why it mattered, what was hard</li>
+            <li>Captures a comprehensive dossier: context, your role, decisions, outcomes, lessons</li>
+            <li>Stored in Work-History so the AI can reference it in future sessions</li>
+            <li>Can also scan existing docs (resumes, decks, writeups) to generate summaries</li>
+          </ul>
+          <div class="callout">
+            <strong>This is the reflection moment.</strong> The interview process itself fills your mind with memories and accomplishments. That's the point &mdash; you benefit whether or not the AI uses it later.
+          </div>
+        </div>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dot red"></div>
+            <div class="terminal-dot yellow"></div>
+            <div class="terminal-dot green"></div>
+          </div>
+          <div class="terminal-body">
+            <span class="prompt">></span> <span class="highlight">/project-interview</span><br><br>
+            <span class="output">Which project should we document?</span><br><br>
+            <span class="dim">> The notification system redesign</span><br>
+            <span class="dim">&nbsp; at my last company</span><br><br>
+            <span class="output">Great. Let's start with context.</span><br>
+            <span class="output">What was the state of things</span><br>
+            <span class="output">before this project kicked off?</span><br>
+            <span class="output">What problem were you solving?</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 13: /job-search -->
+  <div class="slide" data-slide="13" data-accent="warm">
+    <div>
+      <p class="section-label" data-theme="warm">Key skill</p>
+      <h2><code style="font-size: clamp(24px, 2.8vw, 36px); background: var(--accent-light); color: var(--accent-deep); border-color: rgba(217,119,6,0.15);">/job-search</code></h2>
+      <p class="subtitle" style="margin-bottom: 2.5vh;">Exhaustive search, tailored to your criteria</p>
+      <div class="split">
+        <div>
+          <h3 style="margin-bottom: 12px;">Searches 12+ source categories</h3>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
+            <span class="tag" style="background: var(--blue-light); color: var(--blue);">Job boards</span>
+            <span class="tag" style="background: var(--purple-light); color: var(--purple);">VC portfolios</span>
+            <span class="tag" style="background: var(--green-light); color: var(--green);">HN Who's Hiring</span>
+            <span class="tag" style="background: var(--accent-light); color: var(--accent-deep);">Company pages</span>
+            <span class="tag" style="background: var(--rose-light); color: var(--rose);">AI-specific boards</span>
+            <span class="tag" style="background: var(--blue-light); color: var(--blue);">LinkedIn</span>
+          </div>
+          <ul>
+            <li>Generated during onboarding based on your role, comp, location, and industry preferences</li>
+            <li>Filters results by your criteria and rates company fit</li>
+            <li>Outputs tiered results: Tier 1 (strong match) through Tier 3</li>
+            <li>Saves results to your Search folder for tracking</li>
+          </ul>
+        </div>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dot red"></div>
+            <div class="terminal-dot yellow"></div>
+            <div class="terminal-dot green"></div>
+          </div>
+          <div class="terminal-body">
+            <span class="prompt">></span> <span class="highlight">/job-search</span><br><br>
+            <span class="output">Running exhaustive search...</span><br>
+            <span class="dim">  Checking Greenhouse, Lever...</span><br>
+            <span class="dim">  Scanning VC portfolios...</span><br>
+            <span class="dim">  Checking HN Who's Hiring...</span><br><br>
+            <span class="output">Found 23 matches. Filtering...</span><br><br>
+            <span class="output">Tier 1 (5 roles):</span><br>
+            <span class="highlight">  Datadog - Staff Designer, AI</span><br>
+            <span class="highlight">  Notion - Sr Designer, AI</span><br>
+            <span class="dim">  ...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 13b: /todo -->
+  <div class="slide" data-slide="13" data-accent="green">
+    <div>
+      <p class="section-label" data-theme="green">Key skill</p>
+      <h2><code style="font-size: clamp(24px, 2.8vw, 36px); background: var(--green-light); color: var(--green); border-color: rgba(22,163,74,0.15);">/todo</code></h2>
+      <p class="subtitle" style="margin-bottom: 2.5vh;">Manage your task board from the CLI</p>
+      <div class="split">
+        <div>
+          <ul>
+            <li>Add, complete, move, and filter tasks without leaving the terminal</li>
+            <li>Tag by area (<code>#search</code>, <code>#networking</code>, <code>#work</code>) to keep everything organized</li>
+            <li>Prioritize with 🔴 High, 🟡 Medium, 🟢 Low — and add due dates with <code>@{2026-04-25}</code></li>
+            <li>The board renders as drag-and-drop Kanban inside Obsidian &mdash; same file, two views</li>
+          </ul>
+          <div class="callout">
+            <strong>One board for everything.</strong> Search tasks, networking follow-ups, and work action items all live together. You never have to remember which app to check.
+          </div>
+        </div>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dot red"></div>
+            <div class="terminal-dot yellow"></div>
+            <div class="terminal-dot green"></div>
+          </div>
+          <div class="terminal-body">
+            <span class="prompt">></span> <span class="highlight">/todo add</span> Follow up with Maya at Figma <span class="dim">#networking</span><br><br>
+            <span class="output">Added to Not Started.</span><br><br>
+            <span class="prompt">></span> <span class="highlight">/todo list</span> <span class="dim">#search</span><br><br>
+            <span class="output">Not Started:</span><br>
+            <span class="highlight">  🔴 Run /job-search</span><br>
+            <span class="highlight">  🟡 Apply to Datadog role</span><br><br>
+            <span class="prompt">></span> <span class="highlight">/todo done</span> Apply to Datadog role<br><br>
+            <span class="output">Moved to Done. ✓</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 14: Other Skills -->
+  <div class="slide" data-slide="14" data-accent="blue">
+    <div>
+      <p class="section-label" data-theme="blue">More skills</p>
+      <h2>The full toolkit</h2>
+      <div class="skill-grid">
+        <div class="skill-card">
+          <code>/case-study</code>
+          <p>Interactive interview that builds an interview-ready presentation outline + companion dossier from a past project</p>
+        </div>
+        <div class="skill-card">
+          <code>/process-work-history</code>
+          <p>Drop in resumes, LinkedIn exports, old docs. The skill scans, extracts, and writes structured summaries</p>
+        </div>
+        <div class="skill-card">
+          <code>/todo</code>
+          <p>Kanban task management from the CLI. Add, complete, move, and list tasks. Renders in Obsidian as a drag-and-drop board</p>
+        </div>
+        <div class="skill-card">
+          <code>/update</code>
+          <p>Weekly journaling. Captures work highlights, networking, search progress, and content ideas in a structured recap</p>
+        </div>
+      </div>
+      <p class="muted" style="margin-top: 2vh; font-size: clamp(13px, 1.1vw, 16px);">Skills are just markdown files in <code>.claude/skills/</code>. You can read, edit, or create your own.</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 15: A Pattern -->
+  <div class="slide" data-slide="15" data-accent="purple">
+    <div>
+      <p class="section-label" data-theme="purple">The bigger picture</p>
+      <h2>A pattern for knowledge work, not just job search</h2>
+      <div class="split">
+        <div>
+          <p style="margin-bottom: 20px;">The Career Hub is one instance of a broader idea: <strong>structured folder + skills + MCPs</strong> as a way for knowledge workers to interact with AI.</p>
+          <p style="margin-bottom: 20px;">Instead of a single chat, a project, or building an app &mdash; you create a folder where you save files in a structured way, build skills for repeatable work, and use MCPs to pull in third-party data.</p>
+          <p class="muted">This is very similar to Dave Killeen's DEX system and other structured AI approaches. The pattern works because it gives AI context and memory without needing a custom app.</p>
+        </div>
+        <div>
+          <h3 style="margin-bottom: 16px;">I use this pattern for:</h3>
+          <div class="card" style="margin-bottom: 12px; border-left: 4px solid var(--accent);">
+            <h3 style="font-size: clamp(15px, 1.3vw, 18px);">Career</h3>
+            <p>Job search, work history, networking, content</p>
+          </div>
+          <div class="card" style="margin-bottom: 12px; border-left: 4px solid var(--green);">
+            <h3 style="font-size: clamp(15px, 1.3vw, 18px);">Life</h3>
+            <p>Personal management, planning, journaling</p>
+          </div>
+          <div class="card" style="border-left: 4px solid var(--purple);">
+            <h3 style="font-size: clamp(15px, 1.3vw, 18px);">Health</h3>
+            <p>Health tracking, research, appointments</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 16: Build on It -->
+  <div class="slide" data-slide="16" data-accent="green">
+    <div>
+      <p class="section-label" data-theme="green">Make it yours</p>
+      <h2>Treat this as a base, not a finished product</h2>
+      <ul style="margin-top: 1vh;">
+        <li><strong>Add skills</strong> when you find yourself repeating work. If you do it twice, make it a skill.</li>
+        <li><strong>Modify the structure</strong> for your situation. Delete what you don't use. Add folders that matter to you.</li>
+        <li><strong>Edit CLAUDE.md</strong> whenever your situation changes &mdash; new role, new goals, new search criteria.</li>
+        <li><strong>Build your own skills</strong> using the existing ones as examples. They're just markdown files.</li>
+      </ul>
+      <div class="callout" style="background: var(--blue-light); border-color: rgba(29,78,216,0.15);">
+        <strong style="color: var(--blue);">How this was built:</strong> This system grew organically through trial and error over the course of a real job search. It's not perfect &mdash; it's extracted from what actually worked. Your version should evolve the same way.
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 17: Pair with these tools -->
+  <div class="slide" data-slide="17" data-accent="blue">
+    <div>
+      <p class="section-label" data-theme="blue">Pro tips</p>
+      <h2>Pair the hub with these tools</h2>
+      <p class="subtitle" style="margin-bottom: 3vh;">Two external tools that make the whole system work faster and capture more.</p>
+      <div class="split">
+        <div class="card" style="border-top: 3px solid var(--blue);">
+          <h3 style="margin-bottom: 8px;">Voice-to-text (e.g. Wispr Flow)</h3>
+          <p>Speed up <code>/project-interview</code> and <code>/update</code> by dictating your answers instead of typing. You'll say more, and the interview feels like a real conversation.</p>
+        </div>
+        <div class="card" style="border-top: 3px solid var(--accent);">
+          <h3 style="margin-bottom: 8px;">Meeting recorder (e.g. Granola)</h3>
+          <p>Record your meetings and feed the transcripts into the hub. Networking calls, interviews, 1:1s &mdash; every conversation becomes structured context the AI can draw from later.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 18: Get Started -->
+  <div class="slide" data-slide="18" data-accent="warm">
+    <div style="justify-content: center;">
+      <p class="section-label" data-theme="warm">Ready?</p>
+      <h2>Get started in three steps</h2>
+      <p class="subtitle" style="margin-bottom: 3vh;">Ten minutes. You're up and running.</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: clamp(12px, 1.5vh, 20px); width: 100%; margin-bottom: 3vh;">
+        <div class="card" style="display: flex; align-items: flex-start; gap: 16px;">
+          <div style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: var(--accent); color: white; font-family: var(--display); font-size: 16px; font-weight: 700; flex-shrink: 0;">1</div>
+          <div>
+            <h3 style="font-size: clamp(16px, 1.4vw, 20px);">Get a copy of the template</h3>
+            <p style="font-size: clamp(14px, 1.2vw, 17px);"><code>cp -R career-hub-template ~/CareerHub</code></p>
+          </div>
+        </div>
+        <div class="card" style="display: flex; align-items: flex-start; gap: 16px;">
+          <div style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: var(--accent); color: white; font-family: var(--display); font-size: 16px; font-weight: 700; flex-shrink: 0;">2</div>
+          <div>
+            <h3 style="font-size: clamp(16px, 1.4vw, 20px);">Run <code>/onboard</code></h3>
+            <p style="font-size: clamp(14px, 1.2vw, 17px);">Answer questions about yourself. The hub generates your profile and custom skills.</p>
+          </div>
+        </div>
+        <div class="card" style="display: flex; align-items: flex-start; gap: 16px;">
+          <div style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: var(--accent); color: white; font-family: var(--display); font-size: 16px; font-weight: 700; flex-shrink: 0;">3</div>
+          <div>
+            <h3 style="font-size: clamp(16px, 1.4vw, 20px);">Start using it</h3>
+            <p style="font-size: clamp(14px, 1.2vw, 17px);">Run <code>/job-search</code>, do a <code>/project-interview</code>, or just ask a question.</p>
+          </div>
+        </div>
+      </div>
+      <p class="muted small">Built by Brian Greenbaum &middot; briangreenbaum.com</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Navigation -->
+<div class="nav">
+  <button id="prev" aria-label="Previous slide">&larr;</button>
+  <span class="counter" id="counter">1 / 17</span>
+  <button id="next" aria-label="Next slide">&rarr;</button>
+</div>
+
+<script>
+(function() {
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  const progress = document.getElementById('progress');
+  const counter = document.getElementById('counter');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+
+  function update() {
+    slides.forEach((s, i) => s.classList.toggle('active', i === current));
+    counter.textContent = (current + 1) + ' / ' + total;
+    progress.style.width = ((current + 1) / total * 100) + '%';
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+  }
+
+  function go(n) {
+    current = Math.max(0, Math.min(total - 1, n));
+    update();
+  }
+
+  prevBtn.addEventListener('click', () => go(current - 1));
+  nextBtn.addEventListener('click', () => go(current + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault();
+      go(current + 1);
+    }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      go(current - 1);
+    }
+    if (e.key === 'Home') { e.preventDefault(); go(0); }
+    if (e.key === 'End') { e.preventDefault(); go(total - 1); }
+  });
+
+  // Touch support
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? go(current + 1) : go(current - 1);
+    }
+  });
+
+  update();
+})();
+</script>
+
+</body>
+</html>
