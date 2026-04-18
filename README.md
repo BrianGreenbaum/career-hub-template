@@ -2,7 +2,7 @@
 
 A Claude Code–powered career management starter. Clone it, run `/onboard`, and you've got a personalized hub for job search, work history, content, and professional relationships — all as plain markdown on your disk.
 
-> **New here?** Open [`presentation.html`](./presentation.html) in a browser for a visual walkthrough of how the whole system works.
+> **New here?** Open [`overview.html`](./overview.html) in a browser for a visual walkthrough of how the whole system works.
 
 ---
 
@@ -58,7 +58,7 @@ All skills live under `.claude/skills/` and are invoked with a `/` prefix inside
 ├── CLAUDE.md              # Root instructions (populated by /onboard)
 ├── README.md              # This file
 ├── TODOS.md               # Kanban board (manage via /todo)
-├── presentation.html      # Visual overview of the system
+├── overview.html          # Visual overview of the system
 │
 ├── Search/
 │   └── {year}/            # Active job search cycle
